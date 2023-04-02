@@ -50,7 +50,7 @@ class TigerAir:
             },
         }  
    
-    def get_ticket_price_list(self, origin, destination, since, until):
+    def get_ticket_price_list(self, origin, destination, since, until, get_price_num=10):
         url = 'https://api-book.tigerairtw.com/graphql'
         data = {
             "operationName": "appLiveDailyPrices",
@@ -95,12 +95,12 @@ class TigerAir:
         sorted_prices = sorted(filtered_prices, key=lambda p: p['amount'])
 
         # 提取前十個價格
-        cheapest_prices = sorted_prices[:10]
+        cheapest_prices = sorted_prices[:get_price_num]
 
         # 返回前十個最便宜的價格和日期
         return cheapest_prices
 
-    def find_best_op_and_rp(self, out_prices_set, in_prices_set, date_range=10, least_days=3, out_tax=500, in_tax=937):
+    def find_best_op_and_rp(self, out_prices_set, in_prices_set, date_range=7, least_days=4, out_tax=500, in_tax=937):
         print(f"Date Range Setting: {date_range} days")
         for i, out_price in enumerate(out_prices_set):
             for j, in_price in enumerate(in_prices_set):
@@ -117,15 +117,16 @@ class TigerAir:
 
 origin = ['台灣', '台北']
 destination = ['日本', '福岡']
-since = '2023-03-05'
-until = '2023-08-28'
+since = '2023-04-15'
+until = '2023-07-01'
+get_price_num = 20
 
 ##### Main ######
 t = TigerAir()
 # 爬取去程的
-out_prices = t.get_ticket_price_list(destination, origin, since, until)
+out_prices = t.get_ticket_price_list(destination, origin, since, until, get_price_num)
 
-print("==== The 10 Cheapest Prices of Outbound ====")
+print("==== The Outbound Cheapest Prices of ====")
 for index, price in enumerate(out_prices):
     if index == 0:
         print(f"==== Origin: {price['origin']}, Dest.: {price['destination']} ====")
@@ -134,8 +135,8 @@ for index, price in enumerate(out_prices):
 print("\n")
 
 # 爬取回程的價格
-in_prices = t.get_ticket_price_list(origin, destination, since, until)
-print("==== The 10 Cheapest Prices of Inbround ====")
+in_prices = t.get_ticket_price_list(origin, destination, since, until, get_price_num)
+print("==== The Inbround Cheapest Prices of ====")
 for index, price in enumerate(in_prices):
     if index == 0:
         print(f"==== Origin: {price['origin']}, Dest.: {price['destination']} ====")
